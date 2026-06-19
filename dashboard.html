@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — SkillSwap Campus</title>
+  <meta name="description" content="Your personal learning dashboard on SkillSwap Campus." />
+  <link rel="stylesheet" href="css/styles.css" />
+  <style>
+    .dashboard-shell {
+      padding-top: 90px;
+      min-height: 100vh;
+    }
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 28px;
+      align-items: start;
+      padding: 36px 0 80px;
+    }
+    /* Sidebar */
+    .sidebar {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      padding: 28px;
+      backdrop-filter: blur(10px);
+      position: sticky;
+      top: 100px;
+    }
+    .sidebar-profile {
+      text-align: center;
+      padding-bottom: 24px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--color-border);
+    }
+    .sidebar-profile .avatar {
+      width: 72px; height: 72px; font-size: 1.5rem;
+      margin: 0 auto 12px;
+      cursor: default;
+    }
+    .sidebar-profile h3 { margin-bottom: 4px; }
+    .sidebar-profile p { font-size: 0.82rem; }
+    .points-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(45,212,191,0.1));
+      border: 1px solid rgba(99,102,241,0.2);
+      border-radius: var(--radius-full);
+      padding: 6px 14px;
+      font-size: 0.82rem; font-weight: 700;
+      color: var(--color-primary-light);
+      margin-top: 10px;
+    }
+    .sidebar-nav { display: flex; flex-direction: column; gap: 4px; }
+    .sidebar-link {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 14px;
+      border-radius: var(--radius-md);
+      color: var(--color-text-muted);
+      font-size: 0.9rem; font-weight: 500;
+      transition: all var(--transition);
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .sidebar-link svg { width: 18px; height: 18px; flex-shrink: 0; }
+    .sidebar-link:hover, .sidebar-link.active {
+      background: var(--color-surface-2);
+      color: var(--color-text);
+    }
+    .sidebar-link.active { color: var(--color-primary-light); }
+    /* Main content */
+    .dash-main { display: flex; flex-direction: column; gap: 28px; }
+    .dash-section-title {
+      font-family: var(--font-display);
+      font-size: 1.1rem; font-weight: 700;
+      margin-bottom: 16px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    /* Stats */
+    .stat-mini-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .stat-mini {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      backdrop-filter: blur(8px);
+    }
+    .stat-mini-label { font-size: 0.78rem; color: var(--color-text-muted); margin-bottom: 8px; }
+    .stat-mini-value { font-family: var(--font-display); font-size: 1.6rem; font-weight: 800; color: var(--color-text); }
+    .stat-mini-delta { font-size: 0.72rem; color: var(--color-success); margin-top: 4px; }
+    /* Progress bar */
+    .progress-bar {
+      height: 6px;
+      background: var(--color-surface-3);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+      margin-top: 10px;
+    }
+    .progress-fill {
+      height: 100%;
+      border-radius: var(--radius-full);
+      background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+      transition: width 1s ease;
+    }
+    /* Sessions */
+    .session-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: 18px 20px;
+      display: flex; align-items: center; gap: 16px;
+      transition: all var(--transition);
+    }
+    .session-card:hover { border-color: var(--color-border-hover); transform: translateX(3px); }
+    .session-card + .session-card { margin-top: 12px; }
+    .session-icon {
+      width: 42px; height: 42px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(45,212,191,0.1));
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; color: var(--color-primary-light);
+    }
+    .session-icon svg { width: 20px; height: 20px; }
+    .session-info { flex: 1; }
+    .session-info h4 { font-family: var(--font-sans); font-size: 0.92rem; font-weight: 600; color: var(--color-text); margin-bottom: 3px; }
+    .session-info p { font-size: 0.78rem; color: var(--color-text-muted); }
+    /* Achievements */
+    .badge-grid { display: flex; flex-wrap: wrap; gap: 12px; }
+    .achievement-badge {
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      padding: 16px 20px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      font-size: 0.72rem; color: var(--color-text-muted); text-align: center;
+      transition: all var(--transition);
+      min-width: 88px;
+    }
+    .achievement-badge.earned { border-color: rgba(99,102,241,0.3); background: rgba(99,102,241,0.06); color: var(--color-primary-light); }
+    .achievement-badge span { font-size: 1.6rem; }
+    @media (max-width: 900px) {
+      .dashboard-grid { grid-template-columns: 1fr; }
+      .sidebar { position: static; }
+      .stat-mini-grid { grid-template-columns: repeat(2,1fr); }
+    }
+  </style>
+</head>
+<body>
+<canvas id="bg-canvas" class="bg-canvas-wrap"></canvas>
+
+<div class="page-shell">
+  <nav class="navbar scrolled">
+    <div class="container">
+      <a href="index.html" class="brand">
+        <span class="brand-mark">S</span> SkillSwap
+      </a>
+      <div class="nav-links">
+        <a href="marketplace.html" class="nav-link">Marketplace</a>
+        <a href="leaderboard.html" class="nav-link">Leaderboard</a>
+      </div>
+      <div class="nav-actions">
+        <div data-nav="user" class="flex items-center gap-3">
+          <a href="profile.html" class="avatar" data-user-avatar></a>
+        </div>
+        <div data-nav="guest" class="flex gap-2 hidden">
+          <a href="login.html" class="btn btn-ghost btn-sm">Sign In</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="dashboard-shell">
+    <div class="container">
+      <div class="dashboard-grid">
+
+        <!-- Sidebar -->
+        <aside class="sidebar reveal">
+          <div class="sidebar-profile">
+            <div class="avatar avatar-lg" id="sidebar-avatar">JS</div>
+            <h3 id="sidebar-name">Loading…</h3>
+            <p class="text-muted" id="sidebar-email">—</p>
+            <div class="points-pill">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><circle cx="12" cy="8" r="6"/><path d="m9 14-2 8 5-3 5 3-2-8"/></svg>
+              <span id="sidebar-points">0</span> pts
+            </div>
+          </div>
+          <nav class="sidebar-nav">
+            <a href="dashboard.html" class="sidebar-link active">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+              Overview
+            </a>
+            <a href="marketplace.html" class="sidebar-link">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15Z"/></svg>
+              Browse Skills
+            </a>
+            <a href="leaderboard.html" class="sidebar-link">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18.7 8 13 13.7l-4-4L3.3 16.4"/></svg>
+              Leaderboard
+            </a>
+            <a href="profile.html" class="sidebar-link">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              My Profile
+            </a>
+            <a href="#" class="sidebar-link" style="margin-top:12px; color:var(--color-error);" onclick="Auth.logout(); return false;" data-action="logout">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              Sign Out
+            </a>
+          </nav>
+        </aside>
+
+        <!-- Main -->
+        <main class="dash-main">
+
+          <!-- Welcome banner -->
+          <div class="card reveal" style="background:linear-gradient(135deg, rgba(99,102,241,0.12), rgba(45,212,191,0.06)); border-color:rgba(99,102,241,0.2);">
+            <div class="row-between flex-wrap" style="gap:16px;">
+              <div>
+                <div class="eyebrow" style="margin-bottom:10px; display:inline-flex;">👋 Welcome back!</div>
+                <h2 id="welcome-name" style="margin-bottom:8px;">Hey there</h2>
+                <p>You're doing great. Keep learning and earning points!</p>
+              </div>
+              <a href="marketplace.html" class="btn btn-primary">
+                Browse Skills
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </a>
+            </div>
+          </div>
+
+          <!-- Stats -->
+          <div>
+            <div class="dash-section-title">Your Stats</div>
+            <div class="stat-mini-grid">
+              <div class="stat-mini reveal">
+                <div class="stat-mini-label">Total Points</div>
+                <div class="stat-mini-value" id="stat-points">0</div>
+                <div class="stat-mini-delta">+20 this week</div>
+              </div>
+              <div class="stat-mini reveal">
+                <div class="stat-mini-label">Sessions</div>
+                <div class="stat-mini-value" id="stat-sessions">0</div>
+                <div class="stat-mini-delta">Keep going!</div>
+              </div>
+              <div class="stat-mini reveal">
+                <div class="stat-mini-label">Skills Learned</div>
+                <div class="stat-mini-value" id="stat-learned">0</div>
+                <div class="stat-mini-delta">Explore more →</div>
+              </div>
+              <div class="stat-mini reveal">
+                <div class="stat-mini-label">Skills Taught</div>
+                <div class="stat-mini-value" id="stat-taught">0</div>
+                <div class="stat-mini-delta">Share your knowledge</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- XP Progress -->
+          <div class="card reveal">
+            <div class="dash-section-title" style="margin-bottom:8px;">
+              Level Progress
+              <span class="badge badge-primary" id="level-badge">Level 1</span>
+            </div>
+            <p style="font-size:0.85rem; margin-bottom:12px;">Earn more points to level up and unlock new features.</p>
+            <div class="row-between" style="font-size:0.8rem; color:var(--color-text-muted); margin-bottom:6px;">
+              <span id="xp-current">0 pts</span>
+              <span id="xp-next">500 pts to next level</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" id="xp-bar" style="width:0%"></div>
+            </div>
+          </div>
+
+          <!-- Recent sessions -->
+          <div class="reveal">
+            <div class="dash-section-title">
+              Recent Sessions
+              <a href="marketplace.html" class="btn btn-outline btn-sm">Find Sessions</a>
+            </div>
+            <div id="sessions-list">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <!-- Achievements -->
+          <div class="reveal">
+            <div class="dash-section-title">Achievements</div>
+            <div class="badge-grid" id="achievements-grid">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+        </main>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/background.js"></script>
+<script src="js/app.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const user = Auth.getUser();
+    if (!user) { window.location.href = 'login.html'; return; }
+
+    // Populate user info
+    const initials = getInitials(user.name || user.email || 'U');
+    document.getElementById('sidebar-avatar').textContent = initials;
+    document.getElementById('sidebar-name').textContent = user.name || 'Student';
+    document.getElementById('sidebar-email').textContent = user.email || '';
+    document.getElementById('sidebar-points').textContent = (user.points || 0).toLocaleString();
+    document.getElementById('welcome-name').textContent = 'Hey, ' + (user.name?.split(' ')[0] || 'there') + ' 👋';
+
+    document.getElementById('stat-points').textContent = (user.points || 0).toLocaleString();
+    document.getElementById('stat-sessions').textContent = user.sessionsCompleted || 0;
+    document.getElementById('stat-learned').textContent = user.skillsLearned || 0;
+    document.getElementById('stat-taught').textContent = user.skillsTaught || 0;
+
+    // XP bar
+    const pts = user.points || 0;
+    const level = Math.floor(pts / 500) + 1;
+    const progress = (pts % 500) / 500 * 100;
+    document.getElementById('level-badge').textContent = 'Level ' + level;
+    document.getElementById('xp-current').textContent = pts + ' pts';
+    document.getElementById('xp-next').textContent = (500 - (pts % 500)) + ' pts to next level';
+    setTimeout(() => { document.getElementById('xp-bar').style.width = progress + '%'; }, 400);
+
+    // Sample sessions
+    const sessions = [
+      { icon: '💻', title: 'Introduction to Python', teacher: 'By Sarah K.', time: '2 days ago', status: 'Completed' },
+      { icon: '🎨', title: 'UI/UX Design Basics', teacher: 'By Marcus T.', time: '5 days ago', status: 'Completed' },
+      { icon: '📊', title: 'Data Analysis with Excel', teacher: 'By Priya M.', time: 'Next: Tomorrow 3pm', status: 'Upcoming' },
+    ];
+
+    const sessionsList = document.getElementById('sessions-list');
+    if (sessions.length === 0) {
+      sessionsList.innerHTML = '<p class="text-muted" style="text-align:center; padding:32px 0;">No sessions yet. <a href="marketplace.html" style="color:var(--color-primary-light);">Browse the marketplace →</a></p>';
+    } else {
+      sessionsList.innerHTML = sessions.map(s => `
+        <div class="session-card">
+          <div class="session-icon" style="font-size:1.4rem; background:none;">${s.icon}</div>
+          <div class="session-info">
+            <h4>${s.title}</h4>
+            <p>${s.teacher} &middot; ${s.time}</p>
+          </div>
+          <span class="badge ${s.status === 'Upcoming' ? 'badge-accent' : 'badge-success'}">${s.status}</span>
+        </div>
+      `).join('');
+    }
+
+    // Achievements
+    const achievements = [
+      { icon: '🌟', label: 'First Session', earned: true },
+      { icon: '🔥', label: '3-Day Streak', earned: true },
+      { icon: '🏆', label: 'Top Learner', earned: false },
+      { icon: '📚', label: '5 Skills', earned: false },
+      { icon: '🎓', label: 'Graduate', earned: false },
+      { icon: '💡', label: 'Innovator', earned: false },
+    ];
+
+    const grid = document.getElementById('achievements-grid');
+    grid.innerHTML = achievements.map(a => `
+      <div class="achievement-badge ${a.earned ? 'earned' : ''}">
+        <span>${a.icon}</span>
+        ${a.label}
+        ${!a.earned ? '<span style="color:var(--color-text-faint); font-size:0.68rem;">Locked</span>' : ''}
+      </div>
+    `).join('');
+  });
+</script>
+</body>
+</html>

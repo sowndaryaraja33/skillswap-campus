@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Account — SkillSwap Campus</title>
+  <meta name="description" content="Join SkillSwap Campus for free. Start learning and teaching peer skills today." />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+<canvas id="bg-canvas" class="bg-canvas-wrap"></canvas>
+
+<div class="page-shell">
+  <nav class="navbar scrolled">
+    <div class="container">
+      <a href="index.html" class="brand">
+        <span class="brand-mark">S</span> SkillSwap
+      </a>
+      <div class="nav-actions" style="margin-left:auto;">
+        <a href="login.html" class="btn btn-ghost btn-sm">Already have an account?</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="auth-shell" style="padding: 100px 24px 40px;">
+    <div class="auth-card reveal" style="max-width:500px;">
+      <div class="auth-logo">
+        <span class="brand-mark">S</span>
+        <span style="font-family:var(--font-display); font-weight:700; font-size:1.1rem;">SkillSwap</span>
+      </div>
+      <h2 style="margin-bottom:6px; font-size:1.6rem;">Create your account</h2>
+      <p class="auth-subtitle">Join thousands of students learning and teaching</p>
+
+      <div class="alert" id="reg-alert"></div>
+
+      <form id="reg-form" novalidate>
+        <!-- Role selector -->
+        <div class="field" style="margin-bottom:22px;">
+          <label>I want to</label>
+          <div class="role-selector">
+            <input type="radio" name="role" id="role-learner" class="role-option" value="learner" checked />
+            <label for="role-learner" class="role-label">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15Z"/></svg>
+              Learn Skills
+            </label>
+            <input type="radio" name="role" id="role-teacher" class="role-option" value="teacher" />
+            <label for="role-teacher" class="role-label">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              Teach Skills
+            </label>
+            <input type="radio" name="role" id="role-both" class="role-option" value="both" />
+            <label for="role-both" class="role-label">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="m9 14-2 8 5-3 5 3-2-8"/></svg>
+              Both
+            </label>
+          </div>
+        </div>
+
+        <div class="grid-2" style="gap:14px;">
+          <div class="field" id="field-fname">
+            <label for="fname">First name</label>
+            <div class="input-wrap">
+              <svg class="icon-leading" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <input type="text" id="fname" name="fname" placeholder="Alex" autocomplete="given-name" />
+            </div>
+            <span class="field-error">First name is required.</span>
+          </div>
+          <div class="field" id="field-lname">
+            <label for="lname">Last name</label>
+            <div class="input-wrap">
+              <svg class="icon-leading" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <input type="text" id="lname" name="lname" placeholder="Johnson" autocomplete="family-name" />
+            </div>
+            <span class="field-error">Last name is required.</span>
+          </div>
+        </div>
+
+        <div class="field" id="field-email">
+          <label for="email">University email</label>
+          <div class="input-wrap">
+            <svg class="icon-leading" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            <input type="email" id="email" name="email" placeholder="you@university.edu" autocomplete="email" />
+          </div>
+          <span class="field-error">Enter a valid email address.</span>
+        </div>
+
+        <div class="field" id="field-password">
+          <label for="password">Password</label>
+          <div class="input-wrap">
+            <svg class="icon-leading" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <input type="password" id="password" name="password" placeholder="Min. 8 characters" autocomplete="new-password" />
+            <button type="button" class="toggle-visibility" aria-label="Show password">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+          <div class="password-strength" id="pw-strength">
+            <div class="strength-bar">
+              <div class="strength-segment" id="seg1"></div>
+              <div class="strength-segment" id="seg2"></div>
+              <div class="strength-segment" id="seg3"></div>
+              <div class="strength-segment" id="seg4"></div>
+            </div>
+            <span class="strength-label" id="strength-label"></span>
+          </div>
+          <span class="field-error">Password must be at least 8 characters.</span>
+        </div>
+
+        <div class="field" id="field-confirm">
+          <label for="confirm">Confirm password</label>
+          <div class="input-wrap">
+            <svg class="icon-leading" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <input type="password" id="confirm" name="confirm" placeholder="Repeat password" autocomplete="new-password" />
+          </div>
+          <span class="field-error">Passwords do not match.</span>
+        </div>
+
+        <label class="field-checkbox" style="margin-bottom:20px;" id="field-terms">
+          <input type="checkbox" id="terms" name="terms" />
+          I agree to the <a href="#" style="color:var(--color-primary-light); margin:0 3px;">Terms of Service</a> and <a href="#" style="color:var(--color-primary-light); margin:0 3px;">Privacy Policy</a>
+        </label>
+
+        <button type="submit" class="btn btn-primary btn-block btn-lg" id="reg-btn">
+          Create Free Account
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </form>
+
+      <p class="auth-footer-text">
+        Already have an account? <a href="login.html">Sign in</a>
+      </p>
+    </div>
+  </div>
+</div>
+
+<script src="js/background.js"></script>
+<script src="js/app.js"></script>
+<script>
+  // Password strength
+  const pwInput = document.getElementById('password');
+  const pwContainer = document.getElementById('pw-strength');
+  initPasswordStrength(pwInput, pwContainer);
+
+  // Register form
+  const regForm = document.getElementById('reg-form');
+  const regBtn = document.getElementById('reg-btn');
+
+  regForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    Form.clearAll(regForm);
+
+    const fname = document.getElementById('fname').value.trim();
+    const lname = document.getElementById('lname').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const confirm = document.getElementById('confirm').value;
+    const terms = document.getElementById('terms').checked;
+    const role = document.querySelector('input[name="role"]:checked')?.value || 'learner';
+
+    const valid = Form.validate([
+      { field: document.getElementById('field-fname'), value: fname, checks: [v => !v ? 'First name is required.' : null] },
+      { field: document.getElementById('field-lname'), value: lname, checks: [v => !v ? 'Last name is required.' : null] },
+      {
+        field: document.getElementById('field-email'), value: email, checks: [
+          v => !v ? 'Email is required.' : null,
+          v => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) ? 'Enter a valid email.' : null,
+        ]
+      },
+      {
+        field: document.getElementById('field-password'), value: password, checks: [
+          v => !v ? 'Password is required.' : null,
+          v => v.length < 8 ? 'Password must be at least 8 characters.' : null,
+        ]
+      },
+      {
+        field: document.getElementById('field-confirm'), value: confirm, checks: [
+          v => v !== password ? 'Passwords do not match.' : null,
+        ]
+      },
+    ]);
+
+    if (!terms) {
+      Form.showAlert(regForm, 'Please accept the Terms of Service to continue.', 'error');
+      return;
+    }
+    if (!valid) return;
+
+    regBtn.disabled = true;
+    regBtn.textContent = 'Creating account…';
+
+    setTimeout(() => {
+      Auth.setUser({
+        name: fname + ' ' + lname,
+        email,
+        role,
+        points: 0,
+        sessionsCompleted: 0,
+        skillsTaught: 0,
+        joinedAt: new Date().toISOString(),
+        badges: [],
+      });
+      Toast.show('Account created! Welcome to SkillSwap 🚀', 'success');
+      setTimeout(() => window.location.href = 'dashboard.html', 900);
+    }, 1400);
+  });
+</script>
+</body>
+</html>

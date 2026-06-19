@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Leaderboard — SkillSwap Campus</title>
+  <meta name="description" content="See the top learners and teachers on SkillSwap Campus." />
+  <link rel="stylesheet" href="css/styles.css" />
+  <style>
+    .lb-tabs { display: flex; gap: 4px; margin-bottom: 32px; background: rgba(255,255,255,0.03); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 6px; width: fit-content; }
+    .lb-tab { padding: 9px 22px; border-radius: var(--radius-md); font-size: 0.88rem; font-weight: 600; cursor: pointer; transition: all var(--transition); color: var(--color-text-muted); border: none; background: none; }
+    .lb-tab.active { background: var(--color-surface-2); color: var(--color-text); box-shadow: var(--shadow-sm); }
+    .lb-podium { display: flex; align-items: flex-end; justify-content: center; gap: 16px; margin-bottom: 48px; }
+    .podium-slot { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+    .podium-block {
+      width: 110px;
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-display); font-size: 1.6rem; font-weight: 800;
+    }
+    .podium-1 { background: linear-gradient(180deg, rgba(245,158,11,0.25), rgba(245,158,11,0.05)); border: 1px solid rgba(245,158,11,0.3); height: 110px; }
+    .podium-2 { background: linear-gradient(180deg, rgba(148,163,184,0.18), rgba(148,163,184,0.04)); border: 1px solid rgba(148,163,184,0.2); height: 80px; }
+    .podium-3 { background: linear-gradient(180deg, rgba(180,110,60,0.18), rgba(180,110,60,0.04)); border: 1px solid rgba(180,110,60,0.2); height: 60px; }
+    .podium-name { font-weight: 600; font-size: 0.9rem; }
+    .podium-pts { font-size: 0.78rem; color: var(--color-text-muted); }
+    .lb-table { width: 100%; border-collapse: collapse; }
+    .lb-table th { text-align: left; padding: 12px 16px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-text-faint); border-bottom: 1px solid var(--color-border); }
+    .lb-table td { padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: middle; }
+    .lb-table tr:last-child td { border-bottom: none; }
+    .lb-table tr { transition: background var(--transition); }
+    .lb-table tr:hover td { background: rgba(255,255,255,0.02); }
+    .lb-table tr.highlight td { background: rgba(99,102,241,0.06); }
+    .rank-num { font-family: var(--font-display); font-weight: 800; font-size: 1.1rem; color: var(--color-text-muted); }
+    .rank-1 .rank-num { color: hsl(38,90%,55%); }
+    .rank-2 .rank-num { color: hsl(215,20%,65%); }
+    .rank-3 .rank-num { color: hsl(25,70%,50%); }
+    .lb-user { display: flex; align-items: center; gap: 12px; }
+    .lb-pts { font-family: var(--font-display); font-weight: 700; color: var(--color-primary-light); }
+    .lb-change { font-size: 0.8rem; }
+    .change-up { color: var(--color-success); }
+    .change-down { color: var(--color-error); }
+    .change-same { color: var(--color-text-faint); }
+    .lb-grid { display: grid; grid-template-columns: 1fr 320px; gap: 32px; align-items: start; }
+    .lb-sidebar { display: flex; flex-direction: column; gap: 20px; }
+    .lb-side-card { background: rgba(255,255,255,0.03); border: 1px solid var(--color-border); border-radius: var(--radius-xl); padding: 24px; }
+    .lb-side-card h4 { font-family: var(--font-sans); font-size: 0.85rem; font-weight: 700; color: var(--color-text); margin-bottom: 16px; text-transform: none; letter-spacing: 0; }
+    .top-skill-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--color-border); font-size: 0.85rem; }
+    .top-skill-row:last-child { border-bottom: none; }
+    @media (max-width: 900px) { .lb-grid { grid-template-columns: 1fr; } .lb-podium { gap: 10px; } .podium-block { width: 88px; } }
+  </style>
+</head>
+<body>
+<canvas id="bg-canvas" class="bg-canvas-wrap"></canvas>
+
+<div class="page-shell">
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="brand"><span class="brand-mark">S</span> SkillSwap</a>
+      <div class="nav-links">
+        <a href="marketplace.html" class="nav-link">Marketplace</a>
+        <a href="leaderboard.html" class="nav-link active">Leaderboard</a>
+        <a href="index.html#features" class="nav-link">Features</a>
+      </div>
+      <div class="nav-actions">
+        <div data-nav="guest" class="flex gap-2">
+          <a href="login.html" class="btn btn-ghost btn-sm">Sign In</a>
+          <a href="register.html" class="btn btn-primary btn-sm">Get Started</a>
+        </div>
+        <div data-nav="user" class="flex items-center gap-3 hidden">
+          <a href="dashboard.html" class="btn btn-outline btn-sm">Dashboard</a>
+          <a href="profile.html" class="avatar" data-user-avatar></a>
+        </div>
+        <button class="nav-toggle icon-btn" aria-label="Menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+  <div id="mobile-nav" class="mobile-nav">
+    <a href="marketplace.html" class="nav-link">Marketplace</a>
+    <a href="leaderboard.html" class="nav-link active">Leaderboard</a>
+    <a href="index.html#features" class="nav-link">Features</a>
+  </div>
+
+  <div class="page-header">
+    <div class="container">
+      <h1>🏆 <span class="text-gradient">Leaderboard</span></h1>
+      <p>The top learners and teachers powering our community this week.</p>
+    </div>
+  </div>
+
+  <div class="section" style="padding-top:0;">
+    <div class="container">
+
+      <!-- Tabs -->
+      <div class="lb-tabs">
+        <button class="lb-tab active" data-tab="learners">Top Learners</button>
+        <button class="lb-tab" data-tab="teachers">Top Teachers</button>
+        <button class="lb-tab" data-tab="overall">Overall</button>
+      </div>
+
+      <div class="lb-grid">
+        <!-- Left: podium + table -->
+        <div>
+          <!-- Podium -->
+          <div class="lb-podium reveal" id="lb-podium"></div>
+
+          <!-- Table -->
+          <div style="background:rgba(255,255,255,0.03);border:1px solid var(--color-border);border-radius:var(--radius-xl);overflow:hidden;">
+            <table class="lb-table" id="lb-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>User</th>
+                  <th>Points</th>
+                  <th>Sessions</th>
+                  <th>Change</th>
+                </tr>
+              </thead>
+              <tbody id="lb-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="lb-sidebar reveal">
+          <div class="lb-side-card">
+            <h4>🔥 Trending Skills</h4>
+            <div id="trending-skills"></div>
+          </div>
+          <div class="lb-side-card">
+            <h4>📅 Weekly Challenge</h4>
+            <p style="font-size:0.85rem; margin-bottom:14px;">Complete 3 sessions this week to earn the <strong style="color:var(--color-accent);">Momentum Badge</strong> 🏅</p>
+            <div class="progress-bar" style="margin-bottom:8px;height:8px;"><div class="progress-fill" style="width:33%;"></div></div>
+            <p style="font-size:0.78rem; color:var(--color-text-muted);">1 of 3 sessions completed</p>
+          </div>
+          <div class="lb-side-card">
+            <h4>🌍 Global Stats</h4>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:4px;">
+              <div style="text-align:center;"><div class="stat-value" style="font-size:1.4rem;">5,234</div><div class="stat-label">Students</div></div>
+              <div style="text-align:center;"><div class="stat-value" style="font-size:1.4rem;">1,820</div><div class="stat-label">Teachers</div></div>
+              <div style="text-align:center;"><div class="stat-value" style="font-size:1.4rem;">52k</div><div class="stat-label">Sessions</div></div>
+              <div style="text-align:center;"><div class="stat-value" style="font-size:1.4rem;">25</div><div class="stat-label">Countries</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="js/background.js"></script>
+<script src="js/app.js"></script>
+<script>
+const DATA = {
+  learners: [
+    { name:'Priya Mehta', pts:4820, sessions:38, change:'+3', avatar:'PM' },
+    { name:'Jake Okonkwo', pts:4410, sessions:34, change:'+1', avatar:'JO' },
+    { name:'Sofia Larsson', pts:3990, sessions:31, change:'-1', avatar:'SL' },
+    { name:'Arjun Patel', pts:3750, sessions:29, change:'+5', avatar:'AP' },
+    { name:'Nina Torres', pts:3480, sessions:27, change:'–', avatar:'NT' },
+    { name:'Liam Chen', pts:3210, sessions:24, change:'+2', avatar:'LC' },
+    { name:'Amara Osei', pts:2980, sessions:22, change:'-2', avatar:'AO' },
+    { name:'Diego Rivera', pts:2760, sessions:20, change:'+4', avatar:'DR' },
+    { name:'Yuki Tanaka', pts:2540, sessions:18, change:'–', avatar:'YT' },
+    { name:'Emma White', pts:2310, sessions:17, change:'-1', avatar:'EW' },
+  ],
+  teachers: [
+    { name:'Sarah Kim', pts:6100, sessions:82, change:'+2', avatar:'SK' },
+    { name:'Marcus Trevino', pts:5750, sessions:74, change:'–', avatar:'MT' },
+    { name:'Ngan Vo', pts:5280, sessions:68, change:'+1', avatar:'NV' },
+    { name:'James Obi', pts:4900, sessions:61, change:'-1', avatar:'JO' },
+    { name:'Fatima Zahra', pts:4520, sessions:57, change:'+3', avatar:'FZ' },
+    { name:'Carlos Ruiz', pts:4200, sessions:52, change:'–', avatar:'CR' },
+    { name:'Aisha Lam', pts:3880, sessions:48, change:'+2', avatar:'AL' },
+    { name:'David Cho', pts:3560, sessions:44, change:'-2', avatar:'DC' },
+    { name:'Amélie Dubois', pts:3240, sessions:39, change:'–', avatar:'AD' },
+    { name:'Leo Bauer', pts:2920, sessions:35, change:'+1', avatar:'LB' },
+  ],
+  overall: [],
+};
+// Build overall
+const merged = {};
+[...DATA.learners, ...DATA.teachers].forEach(u => {
+  if (!merged[u.name]) merged[u.name] = { ...u };
+  else merged[u.name].pts += u.pts;
+});
+DATA.overall = Object.values(merged).sort((a,b)=>b.pts-a.pts).slice(0,10);
+
+const TRENDING = ['Python Basics','UI/UX Design','Spanish Conv.','React.js','Organic Chem','Guitar','Academic Writing'];
+
+function renderPodium(data) {
+  const top3 = data.slice(0,3);
+  const order = [1, 0, 2]; // 2nd, 1st, 3rd visual position
+  const medals = ['🥇','🥈','🥉'];
+  const colors = ['podium-1','podium-2','podium-3'];
+
+  document.getElementById('lb-podium').innerHTML = order.map(i => {
+    const u = top3[i];
+    if (!u) return '';
+    return `
+      <div class="podium-slot">
+        <div class="avatar" style="width:${i===0?52:42}px;height:${i===0?52:42}px;font-size:${i===0?'1.1rem':'0.85rem'};margin-bottom:4px;">${u.avatar}</div>
+        <div class="podium-name">${u.name.split(' ')[0]}</div>
+        <div class="podium-pts">${u.pts.toLocaleString()} pts</div>
+        <div class="podium-block ${colors[i]}">${medals[i]}</div>
+      </div>`;
+  }).join('');
+}
+
+function renderTable(data) {
+  document.getElementById('lb-body').innerHTML = data.map((u, i) => {
+    const rank = i + 1;
+    const changeClass = u.change.startsWith('+') ? 'change-up' : u.change === '–' ? 'change-same' : 'change-down';
+    const currentUser = Auth.getUser();
+    const isMe = currentUser && currentUser.name === u.name;
+    return `
+      <tr class="rank-${rank} ${isMe ? 'highlight' : ''}">
+        <td><span class="rank-num">${rank}</span></td>
+        <td>
+          <div class="lb-user">
+            <div class="avatar avatar-sm">${u.avatar}</div>
+            <span style="font-size:0.9rem;font-weight:500;">${u.name}${isMe ? ' <span class="badge badge-primary" style="font-size:0.65rem;">You</span>' : ''}</span>
+          </div>
+        </td>
+        <td><span class="lb-pts">${u.pts.toLocaleString()}</span></td>
+        <td style="color:var(--color-text-muted);font-size:0.85rem;">${u.sessions}</td>
+        <td><span class="lb-change ${changeClass}">${u.change}</span></td>
+      </tr>`;
+  }).join('');
+}
+
+function renderTrending() {
+  document.getElementById('trending-skills').innerHTML = TRENDING.map((s, i) => `
+    <div class="top-skill-row">
+      <span>${s}</span>
+      <span class="badge badge-${i < 3 ? 'primary' : 'muted'}">#${i+1}</span>
+    </div>`).join('');
+}
+
+let activeTab = 'learners';
+function renderAll() {
+  const data = DATA[activeTab];
+  renderPodium(data);
+  renderTable(data);
+}
+
+document.querySelectorAll('.lb-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.lb-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    activeTab = btn.dataset.tab;
+    renderAll();
+  });
+});
+
+renderAll();
+renderTrending();
+</script>
+</body>
+</html>

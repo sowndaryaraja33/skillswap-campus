@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Profile — SkillSwap Campus</title>
+  <meta name="description" content="Your SkillSwap Campus profile — skills, reviews, and teaching portfolio." />
+  <link rel="stylesheet" href="css/styles.css" />
+  <style>
+    .profile-shell { padding-top: 90px; padding-bottom: 80px; }
+    .profile-header-card {
+      background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(45,212,191,0.06));
+      border: 1px solid rgba(99,102,241,0.2);
+      border-radius: var(--radius-xl);
+      padding: 40px;
+      margin-bottom: 32px;
+      position: relative;
+      overflow: hidden;
+    }
+    .profile-header-card::before {
+      content: '';
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(99,102,241,0.08) 0%, transparent 70%);
+    }
+    .profile-top { display: flex; gap: 28px; align-items: flex-start; flex-wrap: wrap; }
+    .profile-meta { flex: 1; min-width: 200px; }
+    .profile-name { font-size: clamp(1.4rem,3vw,2rem); margin-bottom: 6px; }
+    .profile-bio { font-size: 0.9rem; margin-bottom: 16px; }
+    .profile-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+    .profile-stats { display: flex; gap: 32px; flex-wrap: wrap; }
+    .profile-stat { text-align: center; }
+    .profile-stat-value { font-family: var(--font-display); font-size: 1.5rem; font-weight: 800; color: var(--color-text); }
+    .profile-stat-label { font-size: 0.75rem; color: var(--color-text-muted); }
+    .profile-grid { display: grid; grid-template-columns: 1fr 320px; gap: 28px; align-items: start; }
+    .profile-section { margin-bottom: 32px; }
+    .profile-section h3 { font-size: 1rem; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--color-border); }
+    .skill-pill {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 16px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-full);
+      font-size: 0.82rem; font-weight: 500;
+      margin: 0 6px 6px 0;
+      transition: all var(--transition);
+    }
+    .skill-pill:hover { border-color: var(--color-primary-light); background: rgba(99,102,241,0.08); }
+    .review-card { background: rgba(255,255,255,0.03); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 14px; }
+    .review-header { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+    .review-text { font-size: 0.88rem; line-height: 1.6; }
+    .review-skill { font-size: 0.75rem; color: var(--color-text-muted); margin-top: 8px; }
+    /* Edit form */
+    .edit-toggle { cursor: pointer; }
+    @media (max-width: 900px) { .profile-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+<canvas id="bg-canvas" class="bg-canvas-wrap"></canvas>
+
+<div class="page-shell">
+  <nav class="navbar scrolled">
+    <div class="container">
+      <a href="index.html" class="brand"><span class="brand-mark">S</span> SkillSwap</a>
+      <div class="nav-links">
+        <a href="marketplace.html" class="nav-link">Marketplace</a>
+        <a href="leaderboard.html" class="nav-link">Leaderboard</a>
+      </div>
+      <div class="nav-actions">
+        <div data-nav="user" class="flex items-center gap-3">
+          <a href="dashboard.html" class="btn btn-outline btn-sm">Dashboard</a>
+          <a href="profile.html" class="avatar" data-user-avatar></a>
+        </div>
+        <div data-nav="guest" class="flex gap-2 hidden">
+          <a href="login.html" class="btn btn-ghost btn-sm">Sign In</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="profile-shell">
+    <div class="container">
+
+      <!-- Profile header -->
+      <div class="profile-header-card reveal">
+        <div class="profile-top">
+          <div class="avatar avatar-xl" id="profile-avatar" style="flex-shrink:0;">JS</div>
+          <div class="profile-meta">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;">
+              <h1 class="profile-name" id="profile-name">Loading…</h1>
+              <span class="badge badge-primary" id="profile-role-badge">Learner</span>
+            </div>
+            <p class="profile-bio" id="profile-bio">Passionate about learning and sharing knowledge. Always looking to grow! 🚀</p>
+            <div class="profile-tags" id="profile-tags">
+              <span class="badge badge-secondary">Python</span>
+              <span class="badge badge-secondary">Design</span>
+              <span class="badge badge-secondary">Spanish</span>
+            </div>
+            <div style="display:flex;gap:12px;">
+              <button class="btn btn-primary btn-sm" onclick="openEditModal()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                Edit Profile
+              </button>
+              <button class="btn btn-outline btn-sm" onclick="Toast.show('Profile link copied!','success')">Share Profile</button>
+            </div>
+          </div>
+          <div class="profile-stats">
+            <div class="profile-stat">
+              <div class="profile-stat-value" id="ps-points">0</div>
+              <div class="profile-stat-label">Points</div>
+            </div>
+            <div class="profile-stat">
+              <div class="profile-stat-value" id="ps-sessions">0</div>
+              <div class="profile-stat-label">Sessions</div>
+            </div>
+            <div class="profile-stat">
+              <div class="profile-stat-value" id="ps-taught">0</div>
+              <div class="profile-stat-label">Taught</div>
+            </div>
+            <div class="profile-stat">
+              <div class="profile-stat-value">4.9 ★</div>
+              <div class="profile-stat-label">Rating</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="profile-grid">
+        <!-- Left -->
+        <div>
+          <!-- Skills I Teach -->
+          <div class="profile-section reveal">
+            <h3>Skills I Teach</h3>
+            <div id="teach-skills">
+              <span class="skill-pill">💻 Python Basics</span>
+              <span class="skill-pill">🌐 Web Development</span>
+              <span class="skill-pill">📊 Data Analysis</span>
+              <button class="btn btn-outline btn-sm" style="margin-top:6px;" onclick="Toast.show('Skill management coming soon!','info')">+ Add Skill</button>
+            </div>
+          </div>
+
+          <!-- Skills I'm Learning -->
+          <div class="profile-section reveal">
+            <h3>Skills I'm Learning</h3>
+            <div id="learn-skills">
+              <span class="skill-pill">🎨 UI/UX Design</span>
+              <span class="skill-pill">🗣️ Spanish</span>
+              <span class="skill-pill">🎵 Guitar</span>
+              <a href="marketplace.html" class="btn btn-outline btn-sm" style="margin-top:6px;">+ Explore Marketplace</a>
+            </div>
+          </div>
+
+          <!-- Reviews -->
+          <div class="profile-section reveal">
+            <h3>Reviews Received (3)</h3>
+            <div class="review-card">
+              <div class="review-header">
+                <div class="avatar avatar-sm">MP</div>
+                <div>
+                  <div style="font-size:0.88rem;font-weight:600;">Marcus P.</div>
+                  <div class="stars" style="font-size:0.75rem;">★★★★★</div>
+                </div>
+              </div>
+              <p class="review-text">Incredible teacher! Explained Python concepts in a way that finally clicked for me. Highly recommended!</p>
+              <p class="review-skill">Python Basics · 2 days ago</p>
+            </div>
+            <div class="review-card">
+              <div class="review-header">
+                <div class="avatar avatar-sm">AK</div>
+                <div>
+                  <div style="font-size:0.88rem;font-weight:600;">Aisha K.</div>
+                  <div class="stars" style="font-size:0.75rem;">★★★★★</div>
+                </div>
+              </div>
+              <p class="review-text">Super patient and knowledgeable. Made web dev feel approachable. Will definitely book again!</p>
+              <p class="review-skill">Web Development · 1 week ago</p>
+            </div>
+            <div class="review-card">
+              <div class="review-header">
+                <div class="avatar avatar-sm">JL</div>
+                <div>
+                  <div style="font-size:0.88rem;font-weight:600;">James L.</div>
+                  <div class="stars" style="font-size:0.75rem;">★★★★☆</div>
+                </div>
+              </div>
+              <p class="review-text">Good session on data analysis. Would have liked a bit more examples but overall very helpful.</p>
+              <p class="review-skill">Data Analysis · 2 weeks ago</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right sidebar -->
+        <div>
+          <!-- Achievements -->
+          <div class="card reveal" style="margin-bottom:20px;">
+            <h4>Achievements</h4>
+            <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:8px;">
+              <div title="First Session" style="font-size:1.8rem; cursor:default;">🌟</div>
+              <div title="3-Day Streak" style="font-size:1.8rem; cursor:default;">🔥</div>
+              <div title="First Review" style="font-size:1.8rem; cursor:default;">⭐</div>
+              <div title="Early Adopter" style="font-size:1.8rem; cursor:default;">🚀</div>
+              <div title="Top 100" style="font-size:1.8rem; filter:grayscale(1); opacity:0.4; cursor:default;" title="Locked">🏆</div>
+              <div title="5 Skills" style="font-size:1.8rem; filter:grayscale(1); opacity:0.4; cursor:default;">📚</div>
+            </div>
+          </div>
+
+          <!-- Joined info -->
+          <div class="card reveal" style="margin-bottom:20px;">
+            <h4>Member Info</h4>
+            <div style="display:flex;flex-direction:column;gap:12px;margin-top:8px;font-size:0.85rem;">
+              <div class="row-between">
+                <span style="color:var(--color-text-muted);">Joined</span>
+                <span id="joined-date">—</span>
+              </div>
+              <div class="row-between">
+                <span style="color:var(--color-text-muted);">Role</span>
+                <span id="member-role">Learner</span>
+              </div>
+              <div class="row-between">
+                <span style="color:var(--color-text-muted);">Level</span>
+                <span id="member-level" class="badge badge-primary">Level 1</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Danger zone -->
+          <div class="card reveal" style="border-color:rgba(239,68,68,0.15);">
+            <h4 style="color:var(--color-error);">Account</h4>
+            <button class="btn btn-outline btn-sm btn-block" style="margin-bottom:8px; border-color:rgba(239,68,68,0.25); color:var(--color-error);" onclick="if(confirm('Sign out?')) Auth.logout();">Sign Out</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Edit Profile Modal -->
+<div id="edit-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); backdrop-filter:blur(8px); z-index:var(--z-modal); align-items:center; justify-content:center; padding:24px;">
+  <div style="background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius-xl); padding:36px; max-width:480px; width:100%; position:relative; max-height:90vh; overflow-y:auto;">
+    <button onclick="closeEditModal()" style="position:absolute;top:16px;right:16px;background:none;border:none;color:var(--color-text-muted);cursor:pointer;font-size:1.4rem;">✕</button>
+    <h3 style="margin-bottom:20px;">Edit Profile</h3>
+    <div class="field">
+      <label for="edit-name">Full Name</label>
+      <div class="input-wrap no-icon"><input type="text" id="edit-name" /></div>
+    </div>
+    <div class="field">
+      <label for="edit-bio">Bio</label>
+      <div class="input-wrap no-icon"><textarea id="edit-bio" style="min-height:80px;"></textarea></div>
+    </div>
+    <div class="field">
+      <label for="edit-skills">Skills (comma separated)</label>
+      <div class="input-wrap no-icon"><input type="text" id="edit-skills" placeholder="Python, Design, Spanish" /></div>
+    </div>
+    <button class="btn btn-primary btn-block" onclick="saveProfile()">Save Changes</button>
+  </div>
+</div>
+
+<script src="js/background.js"></script>
+<script src="js/app.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const user = Auth.getUser();
+    if (!user) { window.location.href = 'login.html'; return; }
+
+    const initials = getInitials(user.name || user.email || 'U');
+    document.getElementById('profile-avatar').textContent = initials;
+    document.getElementById('profile-name').textContent = user.name || 'Student';
+    document.getElementById('profile-role-badge').textContent = user.role === 'teacher' ? 'Teacher' : user.role === 'both' ? 'Learner & Teacher' : 'Learner';
+    document.getElementById('ps-points').textContent = (user.points || 0).toLocaleString();
+    document.getElementById('ps-sessions').textContent = user.sessionsCompleted || 0;
+    document.getElementById('ps-taught').textContent = user.skillsTaught || 0;
+    document.getElementById('member-role').textContent = user.role === 'teacher' ? 'Teacher' : user.role === 'both' ? 'Both' : 'Learner';
+
+    const pts = user.points || 0;
+    document.getElementById('member-level').textContent = 'Level ' + (Math.floor(pts / 500) + 1);
+
+    if (user.joinedAt) {
+      const d = new Date(user.joinedAt);
+      document.getElementById('joined-date').textContent = d.toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' });
+    }
+
+    // Edit modal prefill
+    document.getElementById('edit-name').value = user.name || '';
+    document.getElementById('edit-bio').value = user.bio || '';
+    document.getElementById('edit-skills').value = (user.tags || ['Python','Design','Spanish']).join(', ');
+  });
+
+  function openEditModal() {
+    document.getElementById('edit-modal').style.display = 'flex';
+  }
+  function closeEditModal() {
+    document.getElementById('edit-modal').style.display = 'none';
+  }
+  function saveProfile() {
+    const user = Auth.getUser();
+    if (!user) return;
+    user.name = document.getElementById('edit-name').value.trim() || user.name;
+    user.bio = document.getElementById('edit-bio').value.trim();
+    user.tags = document.getElementById('edit-skills').value.split(',').map(s => s.trim()).filter(Boolean);
+    Auth.setUser(user);
+    Toast.show('Profile updated! ✅', 'success');
+    closeEditModal();
+    location.reload();
+  }
+  document.getElementById('edit-modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('edit-modal')) closeEditModal();
+  });
+</script>
+</body>
+</html>

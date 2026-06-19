@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Skills Marketplace — SkillSwap Campus</title>
+  <meta name="description" content="Browse and book peer-taught skill sessions on SkillSwap Campus." />
+  <link rel="stylesheet" href="css/styles.css" />
+  <style>
+    .filter-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 28px; }
+    .chip {
+      padding: 6px 16px;
+      border-radius: var(--radius-full);
+      font-size: 0.82rem; font-weight: 600;
+      border: 1px solid var(--color-border);
+      color: var(--color-text-muted);
+      cursor: pointer;
+      transition: all var(--transition);
+      background: none;
+    }
+    .chip:hover, .chip.active {
+      background: rgba(99,102,241,0.12);
+      border-color: rgba(99,102,241,0.3);
+      color: var(--color-primary-light);
+    }
+    .skill-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      transition: all var(--transition-md);
+      backdrop-filter: blur(8px);
+      display: flex; flex-direction: column;
+    }
+    .skill-card:hover { border-color: var(--color-border-hover); transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+    .skill-card-thumb {
+      height: 140px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 3.5rem;
+      position: relative; overflow: hidden;
+    }
+    .skill-card-body { padding: 20px; flex: 1; display: flex; flex-direction: column; }
+    .skill-card-body h3 { font-size: 1rem; margin-bottom: 6px; }
+    .skill-card-body p { font-size: 0.82rem; flex: 1; margin-bottom: 14px; }
+    .skill-card-footer { display: flex; align-items: center; justify-content: space-between; margin-top: auto; }
+    .skill-teacher { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: var(--color-text-muted); }
+    .skill-teacher .avatar { width: 26px; height: 26px; font-size: 0.65rem; }
+    .skill-price { font-family: var(--font-display); font-size: 1rem; font-weight: 700; color: var(--color-primary-light); }
+    .results-meta { color: var(--color-text-muted); font-size: 0.88rem; margin-bottom: 16px; }
+    .sort-bar { display: flex; align-items: center; gap: 12px; }
+    .sort-bar select {
+      padding: 8px 14px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      color: var(--color-text);
+      font-family: var(--font-sans);
+      font-size: 0.85rem;
+      outline: none;
+    }
+    .sort-bar select option { background: var(--color-surface); }
+  </style>
+</head>
+<body>
+<canvas id="bg-canvas" class="bg-canvas-wrap"></canvas>
+
+<div class="page-shell">
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="brand"><span class="brand-mark">S</span> SkillSwap</a>
+      <div class="nav-links">
+        <a href="marketplace.html" class="nav-link active">Marketplace</a>
+        <a href="leaderboard.html" class="nav-link">Leaderboard</a>
+        <a href="index.html#features" class="nav-link">Features</a>
+      </div>
+      <div class="nav-actions">
+        <div data-nav="guest" class="flex gap-2">
+          <a href="login.html" class="btn btn-ghost btn-sm">Sign In</a>
+          <a href="register.html" class="btn btn-primary btn-sm">Get Started</a>
+        </div>
+        <div data-nav="user" class="flex items-center gap-3 hidden">
+          <a href="dashboard.html" class="btn btn-outline btn-sm">Dashboard</a>
+          <a href="profile.html" class="avatar" data-user-avatar></a>
+        </div>
+        <button class="nav-toggle icon-btn" aria-label="Menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+  <div id="mobile-nav" class="mobile-nav">
+    <a href="marketplace.html" class="nav-link active">Marketplace</a>
+    <a href="leaderboard.html" class="nav-link">Leaderboard</a>
+    <a href="index.html#features" class="nav-link">Features</a>
+  </div>
+
+  <div class="page-header">
+    <div class="container">
+      <h1>Skills <span class="text-gradient">Marketplace</span></h1>
+      <p>Browse 500+ skills taught by verified peer teachers worldwide.</p>
+    </div>
+  </div>
+
+  <div class="section" style="padding-top:0;">
+    <div class="container">
+
+      <!-- Search + sort -->
+      <div class="search-bar" style="margin-bottom:20px;">
+        <div class="search-wrap">
+          <svg style="position:absolute;left:14px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--color-text-faint);pointer-events:none;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="search" id="search-input" placeholder="Search skills, topics, teachers…" />
+        </div>
+        <div class="sort-bar">
+          <select id="sort-select">
+            <option value="popular">Most Popular</option>
+            <option value="newest">Newest</option>
+            <option value="rating">Top Rated</option>
+            <option value="price-asc">Points: Low→High</option>
+            <option value="price-desc">Points: High→Low</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Category chips -->
+      <div class="filter-chips" id="filter-chips">
+        <button class="chip active" data-cat="all">All Skills</button>
+        <button class="chip" data-cat="tech">💻 Technology</button>
+        <button class="chip" data-cat="design">🎨 Design</button>
+        <button class="chip" data-cat="business">📊 Business</button>
+        <button class="chip" data-cat="language">🗣️ Languages</button>
+        <button class="chip" data-cat="music">🎵 Music</button>
+        <button class="chip" data-cat="science">🔬 Science</button>
+        <button class="chip" data-cat="writing">✍️ Writing</button>
+        <button class="chip" data-cat="fitness">💪 Fitness</button>
+      </div>
+
+      <div class="row-between" style="margin-bottom:20px;">
+        <p class="results-meta" id="results-meta">Showing 12 skills</p>
+      </div>
+
+      <!-- Skills grid -->
+      <div class="grid-3" id="skills-grid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Book Modal -->
+<div id="book-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); backdrop-filter:blur(8px); z-index:var(--z-modal); align-items:center; justify-content:center; padding:24px;">
+  <div style="background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius-xl); padding:36px; max-width:440px; width:100%; position:relative;">
+    <button onclick="closeModal()" style="position:absolute;top:16px;right:16px;background:none;border:none;color:var(--color-text-muted);cursor:pointer;font-size:1.4rem;">✕</button>
+    <h3 id="modal-title" style="margin-bottom:8px;">Book Session</h3>
+    <p id="modal-desc" style="font-size:0.85rem; margin-bottom:24px;"></p>
+    <div class="field">
+      <label>Preferred Date</label>
+      <div class="input-wrap no-icon"><input type="date" id="modal-date" /></div>
+    </div>
+    <div class="field">
+      <label>Preferred Time</label>
+      <div class="input-wrap no-icon"><input type="time" id="modal-time" value="14:00" /></div>
+    </div>
+    <div class="field">
+      <label>Message to Teacher (optional)</label>
+      <div class="input-wrap no-icon"><textarea placeholder="Hi! I'm interested because…" style="min-height:80px;"></textarea></div>
+    </div>
+    <button class="btn btn-primary btn-block" onclick="confirmBook()">
+      Confirm Booking
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </button>
+  </div>
+</div>
+
+<script src="js/background.js"></script>
+<script src="js/app.js"></script>
+<script>
+const SKILLS = [
+  { id:1, cat:'tech', emoji:'💻', title:'Python for Beginners', desc:'Learn Python fundamentals from loops to functions in 4 structured sessions.', teacher:'Sarah K.', rating:4.9, reviews:128, points:50, tag:'Popular' },
+  { id:2, cat:'design', emoji:'🎨', title:'UI/UX Design Fundamentals', desc:'Master Figma, wireframing, and user-centered design principles.', teacher:'Marcus T.', rating:4.8, reviews:94, points:60, tag:'Trending' },
+  { id:3, cat:'business', emoji:'📊', title:'Excel & Data Analysis', desc:'From pivot tables to VLOOKUP — become an Excel power user.', teacher:'Priya M.', rating:4.7, reviews:76, points:40, tag:'' },
+  { id:4, cat:'language', emoji:'🗣️', title:'Spanish Conversation', desc:'Practice real conversational Spanish with a native-level speaker.', teacher:'Carlos R.', rating:5.0, reviews:55, points:35, tag:'Top Rated' },
+  { id:5, cat:'music', emoji:'🎵', title:'Guitar for Beginners', desc:'Learn chords, strumming patterns, and your first songs.', teacher:'Aisha L.', rating:4.8, reviews:42, points:45, tag:'' },
+  { id:6, cat:'science', emoji:'🔬', title:'Organic Chemistry Crash Course', desc:'Tackle nomenclature, reactions, and mechanisms with ease.', teacher:'Dr. Ngan V.', rating:4.9, reviews:63, points:70, tag:'New' },
+  { id:7, cat:'writing', emoji:'✍️', title:'Academic Essay Writing', desc:'Structure arguments, cite properly, and write with clarity.', teacher:'James O.', rating:4.6, reviews:89, points:30, tag:'' },
+  { id:8, cat:'tech', emoji:'🌐', title:'Web Dev with HTML & CSS', desc:'Build beautiful responsive websites from scratch.', teacher:'Fatima Z.', rating:4.8, reviews:117, points:55, tag:'Popular' },
+  { id:9, cat:'fitness', emoji:'💪', title:'Home Workout Programming', desc:'Custom weekly workout plans and technique coaching.', teacher:'Leo B.', rating:4.7, reviews:38, points:25, tag:'' },
+  { id:10, cat:'design', emoji:'✏️', title:'Logo & Brand Identity', desc:'Create professional brand identities using Illustrator.', teacher:'Nina S.', rating:4.9, reviews:52, points:65, tag:'New' },
+  { id:11, cat:'tech', emoji:'📱', title:'React.js Essentials', desc:'Build interactive UIs with React hooks, components, and state.', teacher:'David C.', rating:4.8, reviews:88, points:80, tag:'Trending' },
+  { id:12, cat:'language', emoji:'🇫🇷', title:'French for Travelers', desc:'Essential phrases, grammar, and cultural tips for France.', teacher:'Amélie D.', rating:4.7, reviews:34, points:30, tag:'' },
+];
+
+let filtered = [...SKILLS];
+let activeCat = 'all';
+let searchTerm = '';
+
+function renderSkills() {
+  const grid = document.getElementById('skills-grid');
+  const meta = document.getElementById('results-meta');
+  meta.textContent = `Showing ${filtered.length} skill${filtered.length !== 1 ? 's' : ''}`;
+
+  if (filtered.length === 0) {
+    grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:60px 0; color:var(--color-text-muted);">
+      <div style="font-size:3rem; margin-bottom:16px;">🔍</div>
+      <p>No skills found. Try a different search.</p>
+    </div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map(s => {
+    const gradients = {
+      tech: 'linear-gradient(135deg,rgba(99,102,241,0.2),rgba(45,212,191,0.1))',
+      design: 'linear-gradient(135deg,rgba(245,158,11,0.18),rgba(239,68,68,0.1))',
+      business: 'linear-gradient(135deg,rgba(34,197,94,0.15),rgba(45,212,191,0.1))',
+      language: 'linear-gradient(135deg,rgba(168,85,247,0.18),rgba(99,102,241,0.1))',
+      music: 'linear-gradient(135deg,rgba(236,72,153,0.18),rgba(245,158,11,0.1))',
+      science: 'linear-gradient(135deg,rgba(14,165,233,0.18),rgba(34,197,94,0.1))',
+      writing: 'linear-gradient(135deg,rgba(245,158,11,0.18),rgba(99,102,241,0.1))',
+      fitness: 'linear-gradient(135deg,rgba(239,68,68,0.15),rgba(245,158,11,0.1))',
+    };
+    const bg = gradients[s.cat] || gradients.tech;
+    const stars = '★'.repeat(Math.round(s.rating)) + '☆'.repeat(5 - Math.round(s.rating));
+    return `
+      <div class="skill-card reveal" id="skill-${s.id}">
+        <div class="skill-card-thumb" style="background:${bg};">
+          ${s.emoji}
+          ${s.tag ? `<span class="badge badge-primary" style="position:absolute;top:12px;right:12px;">${s.tag}</span>` : ''}
+        </div>
+        <div class="skill-card-body">
+          <h3>${s.title}</h3>
+          <p>${s.desc}</p>
+          <div style="display:flex;align-items:center;gap:6px;font-size:0.78rem;color:var(--color-accent);margin-bottom:14px;">
+            <span>${stars}</span>
+            <span style="color:var(--color-text-muted);">${s.rating} (${s.reviews})</span>
+          </div>
+          <div class="skill-card-footer">
+            <div class="skill-teacher">
+              <div class="avatar avatar-sm">${s.teacher.split(' ').map(n=>n[0]).join('').toUpperCase()}</div>
+              ${s.teacher}
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span class="skill-price">${s.points} pts</span>
+              <button class="btn btn-primary btn-sm" onclick="openModal(${s.id})">Book</button>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+
+  // Re-observe reveals
+  document.querySelectorAll('.reveal:not(.revealed)').forEach(el => {
+    el.classList.add('revealed');
+  });
+}
+
+function applyFilters() {
+  filtered = SKILLS.filter(s => {
+    const matchCat = activeCat === 'all' || s.cat === activeCat;
+    const matchSearch = !searchTerm || s.title.toLowerCase().includes(searchTerm) || s.desc.toLowerCase().includes(searchTerm) || s.teacher.toLowerCase().includes(searchTerm);
+    return matchCat && matchSearch;
+  });
+  const sort = document.getElementById('sort-select').value;
+  if (sort === 'rating') filtered.sort((a,b) => b.rating - a.rating);
+  else if (sort === 'price-asc') filtered.sort((a,b) => a.points - b.points);
+  else if (sort === 'price-desc') filtered.sort((a,b) => b.points - a.points);
+  else if (sort === 'newest') filtered.sort((a,b) => b.id - a.id);
+  renderSkills();
+}
+
+// Category filter
+document.getElementById('filter-chips').addEventListener('click', e => {
+  const chip = e.target.closest('.chip');
+  if (!chip) return;
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  chip.classList.add('active');
+  activeCat = chip.dataset.cat;
+  applyFilters();
+});
+
+// Search
+let searchTimer;
+document.getElementById('search-input').addEventListener('input', e => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => {
+    searchTerm = e.target.value.trim().toLowerCase();
+    applyFilters();
+  }, 250);
+});
+
+// Sort
+document.getElementById('sort-select').addEventListener('change', applyFilters);
+
+// Modal
+let currentSkillId = null;
+function openModal(id) {
+  const user = Auth.getUser();
+  if (!user) { Toast.show('Please sign in to book a session.', 'warning'); setTimeout(() => window.location.href='login.html', 1200); return; }
+  currentSkillId = id;
+  const skill = SKILLS.find(s => s.id === id);
+  document.getElementById('modal-title').textContent = 'Book: ' + skill.title;
+  document.getElementById('modal-desc').textContent = skill.desc + ' — ' + skill.points + ' pts';
+  const today = new Date(); today.setDate(today.getDate()+1);
+  document.getElementById('modal-date').value = today.toISOString().split('T')[0];
+  document.getElementById('book-modal').style.display = 'flex';
+}
+function closeModal() { document.getElementById('book-modal').style.display = 'none'; }
+function confirmBook() {
+  const skill = SKILLS.find(s => s.id === currentSkillId);
+  Toast.show('Session booked for ' + skill.title + '! 🎉', 'success');
+  closeModal();
+  const user = Auth.getUser();
+  if (user) {
+    user.sessionsCompleted = (user.sessionsCompleted||0) + 1;
+    user.points = (user.points||0) + Math.floor(skill.points * 0.5);
+    Auth.setUser(user);
+  }
+}
+document.getElementById('book-modal').addEventListener('click', e => { if (e.target === document.getElementById('book-modal')) closeModal(); });
+
+// Init
+applyFilters();
+</script>
+</body>
+</html>
