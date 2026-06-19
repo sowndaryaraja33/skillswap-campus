@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Panel — SkillSwap Campus Backend</title>
+  <meta name="description" content="SkillSwap Campus backend server management and admin dashboard." />
+  <link rel="stylesheet" href="css/admin.css" />
+</head>
+<body>
+
+  <div class="container">
+
+    <!-- Header -->
+    <div class="admin-header">
+      <div class="admin-header-left">
+        <a href="index.html" class="back-link">← Back to Site</a>
+        <h1>🚀 SkillSwap Campus</h1>
+        <p>Backend Server — Admin Management Panel</p>
+      </div>
+    </div>
+
+    <!-- Status Bar -->
+    <div class="status-bar">
+      <div class="status-item active" id="serverStatusCard">
+        <h3>Server Status</h3>
+        <div class="value">
+          <span class="online-dot online" id="statusDot"></span>
+          <span id="statusText">Running</span>
+        </div>
+      </div>
+      <div class="status-item active">
+        <h3>Uptime</h3>
+        <div class="value" id="uptime">0:00:00</div>
+      </div>
+      <div class="status-item">
+        <h3>Active Users</h3>
+        <div class="value" id="activeUsers">0</div>
+      </div>
+      <div class="status-item">
+        <h3>Total Requests</h3>
+        <div class="value" id="totalRequests">0</div>
+      </div>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="main-grid">
+
+      <!-- Left Panel: Quick Actions -->
+      <div class="panel">
+        <h2>📋 Quick Actions</h2>
+
+        <div class="form-group">
+          <button id="seedBtn" class="btn btn-success btn-block" onclick="AdminApp.seedDatabase()">
+            🌱 Seed Sample Data
+          </button>
+        </div>
+        <div class="form-group">
+          <button id="clearBtn" class="btn btn-danger btn-block" onclick="AdminApp.clearDatabase()">
+            🗑️ Clear Database
+          </button>
+        </div>
+        <div class="form-group">
+          <button class="btn btn-success btn-block" onclick="AdminApp.generateJWTDisplay()">
+            🔐 Generate JWT Token
+          </button>
+        </div>
+
+        <div id="jwtDisplay" class="jwt-box hidden"></div>
+
+        <hr class="divider-line" />
+
+        <h3 class="section-sub">Platform Features</h3>
+        <ul class="feature-list">
+          <li>User Authentication (JWT)</li>
+          <li>Skills Marketplace</li>
+          <li>Session Booking</li>
+          <li>Real-time Chat</li>
+          <li>Points System</li>
+          <li>Leaderboard</li>
+          <li>AI Mentor</li>
+          <li>Admin Controls</li>
+        </ul>
+
+        <hr class="divider-line" />
+
+        <h3 class="section-sub">Quick Stats</h3>
+        <div class="mini-stats">
+          <div class="mini-stat">
+            <span class="mini-stat-value" id="totalUsersCount">0</span>
+            <span class="mini-stat-label">Users</span>
+          </div>
+          <div class="mini-stat">
+            <span class="mini-stat-value" id="totalSkillsCount">0</span>
+            <span class="mini-stat-label">Skills</span>
+          </div>
+          <div class="mini-stat">
+            <span class="mini-stat-value" id="totalSessionsCount">0</span>
+            <span class="mini-stat-label">Sessions</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Panel: Tabbed Management -->
+      <div class="panel">
+        <h2>⚙️ Server Management</h2>
+
+        <!-- Tabs -->
+        <div class="tabs" id="admin-tabs">
+          <button class="tab-btn active" data-tab="auth">Authentication</button>
+          <button class="tab-btn" data-tab="users">Users</button>
+          <button class="tab-btn" data-tab="skills">Skills</button>
+          <button class="tab-btn" data-tab="sessions">Sessions</button>
+          <button class="tab-btn" data-tab="points">Points</button>
+          <button class="tab-btn" data-tab="api">API Docs</button>
+        </div>
+
+        <!-- ── Auth Tab ── -->
+        <div id="tab-auth" class="tab-content active">
+          <h3 class="tab-title">User Authentication</h3>
+          <div id="authMessage" class="alert-box hidden"></div>
+
+          <div class="form-group">
+            <label for="authEmail">Email</label>
+            <input type="email" id="authEmail" placeholder="student@example.com" value="student@example.com" />
+          </div>
+          <div class="form-group">
+            <label for="authPassword">Password</label>
+            <input type="password" id="authPassword" placeholder="password" value="password123" />
+          </div>
+          <div class="form-group row-actions">
+            <button class="btn btn-success" onclick="AdminApp.registerUser()">Register</button>
+            <button class="btn btn-primary" onclick="AdminApp.loginUser()">Login</button>
+          </div>
+          <div id="authResponse" class="json-display"></div>
+        </div>
+
+        <!-- ── Users Tab ── -->
+        <div id="tab-users" class="tab-content">
+          <h3 class="tab-title">User Management</h3>
+          <div class="stats-grid">
+            <div class="stat-box">
+              <div class="stat-number" id="usersStatTotal">0</div>
+              <div class="stat-label">Total Users</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-number" id="usersStatVerified">0</div>
+              <div class="stat-label">Verified</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-number" id="usersStatRating">0</div>
+              <div class="stat-label">Avg Rating</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <button class="btn btn-primary btn-block" onclick="AdminApp.getAllUsers()">Refresh Users</button>
+          </div>
+          <div id="usersList" class="data-list"></div>
+        </div>
+
+        <!-- ── Skills Tab ── -->
+        <div id="tab-skills" class="tab-content">
+          <h3 class="tab-title">Skills Management</h3>
+          <div class="form-group">
+            <label for="skillName">Skill Name</label>
+            <input type="text" id="skillName" placeholder="e.g., Web Development" />
+          </div>
+          <div class="form-group">
+            <label for="skillCategory">Category</label>
+            <select id="skillCategory">
+              <option value="Programming">💻 Programming</option>
+              <option value="Design">🎨 Design</option>
+              <option value="Languages">🗣️ Languages</option>
+              <option value="Communication">📢 Communication</option>
+              <option value="Music">🎵 Music</option>
+              <option value="Academic">📚 Academic</option>
+              <option value="Business">📊 Business</option>
+              <option value="Fitness">💪 Fitness</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="skillDescription">Description</label>
+            <textarea id="skillDescription" placeholder="Describe this skill…" rows="3"></textarea>
+          </div>
+          <div class="form-group row-actions">
+            <button class="btn btn-success" onclick="AdminApp.createSkill()">Create Skill</button>
+            <button class="btn btn-primary" onclick="AdminApp.getAllSkills()">View All</button>
+          </div>
+          <div id="skillsList" class="data-list"></div>
+        </div>
+
+        <!-- ── Sessions Tab ── -->
+        <div id="tab-sessions" class="tab-content">
+          <h3 class="tab-title">Session Management</h3>
+          <div class="form-group">
+            <label for="sessionDate">Session Date & Time</label>
+            <input type="datetime-local" id="sessionDate" />
+          </div>
+          <div class="form-group">
+            <label for="sessionDuration">Duration (minutes)</label>
+            <input type="number" id="sessionDuration" value="60" min="15" max="240" />
+          </div>
+          <div class="form-group row-actions">
+            <button class="btn btn-success" onclick="AdminApp.createSession()">Create Session</button>
+            <button class="btn btn-primary" onclick="AdminApp.getAllSessions()">View All</button>
+          </div>
+          <div id="sessionsList" class="data-list"></div>
+        </div>
+
+        <!-- ── Points Tab ── -->
+        <div id="tab-points" class="tab-content">
+          <h3 class="tab-title">Points System</h3>
+          <div class="stats-grid">
+            <div class="stat-box">
+              <div class="stat-number" id="totalPointsDistributed">0</div>
+              <div class="stat-label">Total Points</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-number" id="topEarnerPts">—</div>
+              <div class="stat-label">Top Earner</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-number" id="avgPointsStat">0</div>
+              <div class="stat-label">Avg Points</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <button class="btn btn-primary btn-block" onclick="AdminApp.getLeaderboard()">Refresh Leaderboard</button>
+          </div>
+          <div id="leaderboardList" class="data-list"></div>
+        </div>
+
+        <!-- ── API Docs Tab ── -->
+        <div id="tab-api" class="tab-content">
+          <h3 class="tab-title">API Endpoints</h3>
+
+          <h4 class="api-section-title">Authentication</h4>
+          <div class="api-endpoint"><span class="api-method method-post">POST</span>/api/v1/auth/register</div>
+          <div class="api-endpoint"><span class="api-method method-post">POST</span>/api/v1/auth/login</div>
+          <div class="api-endpoint"><span class="api-method method-post">POST</span>/api/v1/auth/logout</div>
+
+          <h4 class="api-section-title">Users</h4>
+          <div class="api-endpoint"><span class="api-method method-get">GET</span>/api/v1/users</div>
+          <div class="api-endpoint"><span class="api-method method-get">GET</span>/api/v1/users/:id</div>
+          <div class="api-endpoint"><span class="api-method method-patch">PATCH</span>/api/v1/users/:id</div>
+          <div class="api-endpoint"><span class="api-method method-delete">DELETE</span>/api/v1/users/:id</div>
+
+          <h4 class="api-section-title">Skills</h4>
+          <div class="api-endpoint"><span class="api-method method-get">GET</span>/api/v1/skills</div>
+          <div class="api-endpoint"><span class="api-method method-post">POST</span>/api/v1/skills</div>
+          <div class="api-endpoint"><span class="api-method method-patch">PATCH</span>/api/v1/skills/:id/verify</div>
+          <div class="api-endpoint"><span class="api-method method-delete">DELETE</span>/api/v1/skills/:id</div>
+
+          <h4 class="api-section-title">Sessions</h4>
+          <div class="api-endpoint"><span class="api-method method-get">GET</span>/api/v1/sessions</div>
+          <div class="api-endpoint"><span class="api-method method-post">POST</span>/api/v1/sessions</div>
+          <div class="api-endpoint"><span class="api-method method-patch">PATCH</span>/api/v1/sessions/:id/approve</div>
+          <div class="api-endpoint"><span class="api-method method-delete">DELETE</span>/api/v1/sessions/:id</div>
+
+          <h4 class="api-section-title">Points & Leaderboard</h4>
+          <div class="api-endpoint"><span class="api-method method-get">GET</span>/api/v1/points/leaderboard</div>
+          <div class="api-endpoint"><span class="api-method method-post">POST</span>/api/v1/points/award</div>
+        </div>
+
+      </div><!-- end right panel -->
+    </div><!-- end main-grid -->
+
+    <div class="admin-footer">
+      <p>SkillSwap Campus &copy; 2024 &mdash; Backend Admin Panel</p>
+    </div>
+
+  </div><!-- end container -->
+
+  <script src="js/app.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>
